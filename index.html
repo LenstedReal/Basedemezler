@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorgu Paneli — v3.1 / Lenstedreal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js CDN (State yönetimi için) -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          boxShadow: {
+            'red-glow': '0 0 20px rgba(239, 68, 68, 0.2)',
+            'gold-glow': '0 0 15px rgba(251, 191, 36, 0.15)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Yatay kaydırma çubuğunu gizlemek/inceltmek için */
+    .scrollbar-thin::-webkit-scrollbar {
+      height: 4px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: #262626;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body class="bg-[#0a0a0a] text-gray-200 font-mono min-h-screen flex flex-col items-center justify-between p-4 antialiased selection:bg-amber-500 selection:text-black" 
+      x-data="{ activeTab: 'gsm-tc' }">
+
+  <!-- ALERT OVERLAY (PANEL KULLANIM DIŞIDIR) -->
+  <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#121212] border border-red-600 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_30px_rgba(239,68,68,0.3)] border-t-4">
+      <div class="text-red-500 text-5xl mb-4 animate-bounce">⚠️</div>
+      <h2 class="text-xl font-black tracking-widest text-white uppercase drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+        SİSTEM ERİŞİMİ ENGELLENDİ
+      </h2>
+      <p class="text-red-400 text-sm font-bold tracking-wider mt-3 uppercase bg-red-950/40 py-2 rounded-xl border border-red-900/50 px-3">
+        PANEL KULLANIM DIŞIDIR
+      </p>
+      <p class="text-neutral-500 text-[11px] mt-4 font-sans tracking-tight">
+        Mevcut modüller ve API hatları geçici olarak devre dışı bırakılmıştır.
+      </p>
+    </div>
+  </div>
+
+  <!-- HEADER SECTION -->
+  <header class="w-full max-w-md text-center mt-6 mb-8 relative">
+    <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-24 bg-red-600/10 blur-3xl rounded-full pointer-events-none"></div>
+    <h1 class="text-3xl font-black tracking-widest text-white drop-shadow-[0_0_12px_rgba(239,68,68,0.7)] uppercase">
+      SORGULAMA PANELİ
+    </h1>
+    <p class="text-amber-500 text-lg font-bold tracking-widest mt-1">v3.1</p>
+    <div class="w-full h-[2px] bg-gradient-to-r from-transparent via-red-600 to-transparent mt-4"></div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="w-full max-w-md flex-1 flex flex-col gap-6">
+    
+    <!-- SORGULAMA MODÜLLERİ (Horizontal Scroll Row) -->
+    <div class="w-full bg-[#121212] border border-neutral-800/60 rounded-2xl p-4 shadow-xl">
+      <h2 class="text-xs font-bold text-amber-500/80 uppercase tracking-wider mb-3 px-1">
+        SORGULAMA MODÜLLERİ
+      </h2>
+      <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+        
+        <button 
+          @click="activeTab = 'gsm-tc'"
+          :class="activeTab === 'gsm-tc' ? 'bg-[#161616] border-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-[#1a1a1a] border-transparent text-gray-400 hover:text-gray-200'"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border"
+        >
+          📱 GSM ↔ TC Sorgu
+        </button>
+
+        <button 
+          @click="activeTab = 'tc-gsm'"
+          :class="activeTab === 'tc-gsm' ? 'bg-[#161616] border-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-[#1a1a1a] border-transparent text-gray-400 hover:text-gray-200'"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border"
+        >
+          🔍 TC ↔ GSM Sorgu
+        </button>
+
+        <button 
+          @click="activeTab = 'ad-soyad'"
+          :class="activeTab === 'ad-soyad' ? 'bg-[#161616] border-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-[#1a1a1a] border-transparent text-gray-400 hover:text-gray-200'"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border"
+        >
+          👤 Ad Soyad + Şehir ↔ TC Sorgu
+        </button>
+
+        <button 
+          @click="activeTab = 'aile'"
+          :class="activeTab === 'aile' ? 'bg-[#161616] border-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-[#1a1a1a] border-transparent text-gray-400 hover:text-gray-200'"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border"
+        >
+          👥 Aile / Sülale Sorgu
+        </button>
+
+        <button 
+          @click="activeTab = 'email'"
+          :class="activeTab === 'email' ? 'bg-[#161616] border-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-[#1a1a1a] border-transparent text-gray-400 hover:text-gray-200'"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border"
+        >
+          📩 E-mail info
+        </button>
+
+        <button 
+          @click="activeTab = 'password'"
+          :class="activeTab === 'password' ? 'bg-[#161616] border-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-[#1a1a1a] border-transparent text-gray-400 hover:text-gray-200'"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border"
+        >
+          🔑 Password İnfo
+        </button>
+
+        <button 
+          @click="activeTab = 'nickname'"
+          :class="activeTab === 'nickname' ? 'bg-[#161616] border-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-[#1a1a1a] border-transparent text-gray-400 hover:text-gray-200'"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border"
+        >
+          🕵️ Kullanıcı Adı / Nickname
+        </button>
+
+        <button 
+          @click="activeTab = 'adres'"
+          :class="activeTab === 'adres' ? 'bg-[#161616] border-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-[#1a1a1a] border-transparent text-gray-400 hover:text-gray-200'"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border"
+        >
+          📅 Adres Sorgu
+        </button>
+
+      </div>
+    </div>
+
+    <!-- DYNAMIC FORM CARD -->
+    <div class="w-full bg-[#121212] border border-neutral-800/60 rounded-3xl p-6 shadow-xl flex flex-col gap-4">
+      
+      <!-- Form Headings -->
+      <template x-if="activeTab === 'gsm-tc'"><h3 class="text-xl font-bold text-amber-500">GSM ↔ TC Sorgu</h3></template>
+      <template x-if="activeTab === 'tc-gsm'"><h3 class="text-xl font-bold text-amber-500">TC ↔ GSM Sorgu</h3></template>
+      <template x-if="activeTab === 'ad-soyad'"><h3 class="text-xl font-bold text-amber-500">Ad Soyad + Şehir ↔ TC Sorgu</h3></template>
+      <template x-if="activeTab === 'aile'"><h3 class="text-xl font-bold text-amber-500">Aile / Sülale Sorgu</h3></template>
+      <template x-if="activeTab === 'email'">
+        <div>
+          <h3 class="text-xl font-bold text-amber-500">E-mail info</h3>
+          <p class="text-xs text-gray-500 mt-1">Hedef Kimlik Bilgilerinden E-posta sorgu</p>
+        </div>
+      </template>
+      <template x-if="activeTab === 'password'"><h3 class="text-xl font-bold text-amber-500">Password İnfo</h3></template>
+      <template x-if="activeTab === 'nickname'"><h3 class="text-xl font-bold text-amber-500">Kullanıcı Adı / Nickname</h3></template>
+      <template x-if="activeTab === 'adres'">
+        <div>
+          <h3 class="text-xl font-bold text-amber-500">Adres Sorgu</h3>
+          <p class="text-xs text-gray-500 bg-neutral-900/80 border border-neutral-800 p-2.5 rounded-xl mt-2 leading-relaxed">
+            <span class="text-amber-500 font-bold">Uyarı:</span> Bu Modun Kesin adres tespiti ve doğru çalışabilmesi için 11 haneli TC Kimlik No giriniz ⚠️
+          </p>
+        </div>
+      </template>
+
+      <!-- Form Inputs Switcher -->
+      <div class="flex flex-col gap-3 mt-2">
+        <template x-if="activeTab === 'gsm-tc'">
+          <input type="text" placeholder="Telefon numarası giriniz" class="w-full bg-black border border-amber-500/40 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none transition-all focus:shadow-[0_0_10px_rgba(245,158,11,0.1)]">
+        </template>
+
+        <template x-if="activeTab === 'tc-gsm'">
+          <input type="text" placeholder="11 haneli TC Kimlik No giriniz" class="w-full bg-black border border-amber-500/40 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none transition-all">
+        </template>
+
+        <template x-if="activeTab === 'ad-soyad'">
+          <div class="flex flex-col gap-3">
+            <input type="text" placeholder="Ad" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+            <input type="text" placeholder="Soyad" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+            <input type="text" placeholder="Şehir" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+            <input type="text" placeholder="İlçe (opsiyonel)" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+          </div>
+        </template>
+
+        <template x-if="activeTab === 'aile'">
+          <input type="text" placeholder="11 haneli TC Kimlik No giriniz" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+        </template>
+
+        <template x-if="activeTab === 'email'">
+          <div class="flex flex-col gap-3">
+            <input type="text" placeholder="Hedef Ad" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+            <input type="text" placeholder="Hedef Soyad" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+            <input type="text" placeholder="Doğum Tarihi (GG.AA.YYYY)" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+          </div>
+        </template>
+
+        <template x-if="activeTab === 'password'">
+          <input type="text" placeholder="(ör:mail@example.com)" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+        </template>
+
+        <template x-if="activeTab === 'nickname'">
+          <div class="flex flex-col gap-3">
+            <div class="text-xs text-neutral-500 font-bold mb-1">Mod 1: Ad Soyad ↔ Nickname Tespiti</div>
+            <div class="flex gap-2">
+              <input type="text" placeholder="Ad" class="w-1/2 bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+              <input type="text" placeholder="Soyad" class="w-1/2 bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+            </div>
+            <button class="w-full bg-amber-500 text-black font-black text-xs py-2.5 rounded-xl uppercase tracking-wider hover:bg-amber-400 transition-colors mb-2">SORGULA</button>
+            
+            <div class="text-xs text-neutral-500 font-bold mb-1">Mod 2: Sherlock OSINT Modu (İz Bulucu)</div>
+            <input type="text" placeholder="Nickname / Kullanıcı adı yazınız" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+          </div>
+        </template>
+
+        <template x-if="activeTab === 'adres'">
+          <input type="text" placeholder="Apartman" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+        </template>
+      </div>
+
+      <!-- Submit Button -->
+      <template x-if="activeTab !== 'nickname'">
+        <button class="w-full bg-amber-500 text-black font-black text-sm py-4 rounded-xl mt-2 uppercase tracking-widest hover:bg-amber-400 transition-all active:scale-[0.99] shadow-lg shadow-amber-500/10">
+          SORGULA
+        </button>
+      </template>
+
+    </div>
+
+    <!-- RESULTS SECTION -->
+    <div class="w-full bg-[#121212] border border-red-950/40 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/30 to-transparent"></div>
+      
+      <h3 class="text-center font-black text-lg text-[#ff5566] tracking-widest uppercase mb-6 drop-shadow-[0_0_8px_rgba(255,85,102,0.3)]">
+        SORGULAMA SONUÇLARI
+      </h3>
+
+      <div class="flex flex-col gap-4 text-xs">
+        
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">AD:</div>
+          <div class="text-white font-mono mt-0.5 pl-1">Bilinmiyor</div>
+        </div>
+
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">SOYAD:</div>
+          <div class="text-white font-mono mt-0.5 pl-1 break-all">Bilinmiyor</div>
+        </div>
+
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">TC KİMLİK NO:</div>
+          <div class="text-white font-mono mt-0.5 pl-1">Bilinmiyor</div>
+        </div>
+
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">GSM / TELEFON:</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
+        </div>
+
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">DOĞUM TARİHİ / YILI:</div>
+          <div class="text-white font-mono mt-0.5 pl-1">vesile</div>
+        </div>
+
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">AİLE / SÜLALE YAKINLIK DERECESİ BİLGİSİ:</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
+        </div>
+
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">E-POSTA ADRESİ:</div>
+          <div class="text-white font-mono mt-0.5 pl-1 text-emerald-400 break-all">emre_yoruk1905@hotmail.com</div>
+        </div>
+
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">PASSWORD INFO:</div>
+          <div class="text-white font-mono mt-0.5 pl-1 text-red-400">78.191.239.173</div>
+        </div>
+
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">KULLANICI ADI / NICKNAME:</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
+        </div>
+
+        <div class="border-b border-neutral-900 pb-2">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">SHERLOCK OSINT PLATFORM LİNKLERİ:</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
+        </div>
+
+        <div class="pb-1">
+          <div class="text-amber-500/90 font-bold uppercase tracking-wider">ADRES BİLGİSİ:</div>
+          <div class="text-white font-mono mt-0.5 pl-1 leading-relaxed break-all">-</div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="w-full text-center text-[10px] text-neutral-600 tracking-widest font-sans mt-8 mb-2">
+    2027© Made with <span class="text-red-500 animate-pulse">❤️</span> by <span class="text-neutral-400 font-mono font-bold">LENSTEDREAL</span>
+  </footer>
+
+</body>
+</html>
