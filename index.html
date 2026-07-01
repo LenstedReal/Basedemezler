@@ -19,6 +19,21 @@
         }
       }
     }
+
+    // Ekran görüntüsü, yazdırma ve sayfa kaydetme kısayolları için temel engelleme mekanizmaları
+    window.addEventListener('keydown', function(e) {
+      // Ctrl+P (Yazdırma) ve Ctrl+S (Kaydetme) engelleme
+      if ((e.ctrlKey && e.key === 'p') || (e.ctrlKey && e.key === 's') || (e.ctrlKey && e.key === 'P') || (e.ctrlKey && e.key === 'S')) {
+        e.preventDefault();
+      }
+    });
+
+    // PrintScreen tetiklendiğinde panonun temizlenmesi denemesi
+    window.addEventListener('keyup', function(e) {
+      if (e.key === 'PrintScreen') {
+        navigator.clipboard.writeText('');
+      }
+    });
   </script>
   <style>
     /* Yatay OSINT Modül Navigasyon Barı İçin Scrollbar Optimizasyonu */
@@ -32,10 +47,40 @@
       background: #262626;
       border-radius: 2px;
     }
+
+    /* Baskı modunda (veya tarayıcı ekran görüntüsü çıktı araçlarında) içeriği gizleme */
+    @media print {
+      body {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-[#0a0a0a] text-gray-200 font-mono min-h-screen flex flex-col items-center justify-between p-4 antialiased selection:bg-amber-500 selection:text-black" 
-      x-data="{ activeTab: 'gsm-tc' }">
+      x-data="{ activeTab: 'gsm-tc', showAlert: true, alertClicks: 0 }">
+
+  <template x-if="showAlert">
+    <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-all duration-300">
+      <div 
+        @click="alertClicks++; if (alertClicks >= 4) { showAlert = false; alertClicks = 0; setTimeout(() => { showAlert = true; }, 5000); }"
+        class="bg-[#121212] border border-red-600 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_30px_rgba(239,68,68,0.3)] border-t-4 relative cursor-pointer select-none"
+      >
+        <div class="text-xs text-neutral-600 hover:text-red-500 transition-colors absolute top-3 right-4">
+          [BYPASS]
+        </div>
+        <div class="text-red-500 text-5xl mb-4 animate-bounce">⚠️</div>
+        <h2 class="text-xl font-black tracking-widest text-white uppercase drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+          SİSTEM ERİŞİMİ ENGELLENDİ
+        </h2>
+        <p class="text-red-400 text-sm font-bold tracking-wider mt-3 uppercase bg-red-950/40 py-2 rounded-xl border border-red-900/50 px-3">
+          PANEL KULLANIM DIŞIDIR
+        </p>
+        <p class="text-neutral-500 text-[11px] mt-4 font-sans tracking-tight leading-relaxed">
+          Mevcut modüller ve veritabanı geçici olarak devre dışı bırakılmıştır. Altyapı en yakın zamanda tekrar kurulacaktır.
+        </p>
+      </div>
+    </div>
+  </template>
 
   <header class="w-full max-w-md text-center mt-6 mb-8 relative">
     <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-24 bg-red-600/10 blur-3xl rounded-full pointer-events-none"></div>
@@ -218,57 +263,57 @@
         
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">AD:</div>
-          <div class="text-white font-mono mt-0.5 pl-1">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
         </div>
 
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">SOYAD:</div>
-          <div class="text-white font-mono mt-0.5 pl-1 break-all">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1 break-all">-</div>
         </div>
 
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">TC KİMLİK NO:</div>
-          <div class="text-white font-mono mt-0.5 pl-1">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
         </div>
 
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">GSM / TELEFON:</div>
-          <div class="text-white font-mono mt-0.5 pl-1">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
         </div>
 
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">DOĞUM TARİHİ / YILI:</div>
-          <div class="text-white font-mono mt-0.5 pl-1">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
         </div>
 
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">AİLE / SÜLALE YAKINLIK DERECESİ BİLGİSİ:</div>
-          <div class="text-white font-mono mt-0.5 pl-1">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
         </div>
 
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">E-POSTA ADRESİ:</div>
-          <div class="text-white font-mono mt-0.5 pl-1 text-emerald-400 break-all">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1 text-emerald-400 break-all">-</div>
         </div>
 
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">PASSWORD INFO:</div>
-          <div class="text-white font-mono mt-0.5 pl-1 text-red-400">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1 text-red-400">-</div>
         </div>
 
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">KULLANICI ADI / NICKNAME:</div>
-          <div class="text-white font-mono mt-0.5 pl-1">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
         </div>
 
         <div class="border-b border-neutral-900 pb-2">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">SHERLOCK OSINT PLATFORM LİNKLERİ:</div>
-          <div class="text-white font-mono mt-0.5 pl-1">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1">-</div>
         </div>
 
         <div class="pb-1">
           <div class="text-amber-500/90 font-bold uppercase tracking-wider">ADRES BİLGİSİ:</div>
-          <div class="text-white font-mono mt-0.5 pl-1 leading-relaxed break-all">bilinmiyor</div>
+          <div class="text-white font-mono mt-0.5 pl-1 leading-relaxed break-all">-</div>
         </div>
 
       </div>
