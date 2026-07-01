@@ -8,7 +8,6 @@
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   
   <script>
-    // Tailwind Özel Tema Konfigürasyonu: Tech-Noir ve Siber Estetik Odaklı Glow Efektleri
     tailwind.config = {
       theme: {
         extend: {
@@ -20,15 +19,12 @@
       }
     }
 
-    // Ekran görüntüsü, yazdırma ve sayfa kaydetme kısayolları için temel engelleme mekanizmaları
     window.addEventListener('keydown', function(e) {
-      // Ctrl+P (Yazdırma) ve Ctrl+S (Kaydetme) engelleme
       if ((e.ctrlKey && e.key === 'p') || (e.ctrlKey && e.key === 's') || (e.ctrlKey && e.key === 'P') || (e.ctrlKey && e.key === 'S')) {
         e.preventDefault();
       }
     });
 
-    // PrintScreen tetiklendiğinde panonun temizlenmesi denemesi
     window.addEventListener('keyup', function(e) {
       if (e.key === 'PrintScreen') {
         navigator.clipboard.writeText('');
@@ -36,7 +32,6 @@
     });
   </script>
   <style>
-    /* Yatay OSINT Modül Navigasyon Barı İçin Scrollbar Optimizasyonu */
     .scrollbar-thin::-webkit-scrollbar {
       height: 4px;
     }
@@ -48,7 +43,6 @@
       border-radius: 2px;
     }
 
-    /* Baskı modunda (veya tarayıcı ekran görüntüsü çıktı araçlarında) içeriği gizleme */
     @media print {
       body {
         display: none !important;
@@ -234,6 +228,7 @@
             
             <div class="text-xs text-neutral-500 font-bold mb-1">Mod 2: Sherlock OSINT Modu (İz Bulucu)</div>
             <input type="text" placeholder="Nickname / Kullanıcı adı yazınız" class="w-full bg-black border border-neutral-800 focus:border-amber-500 rounded-xl px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none">
+            <button class="w-full bg-amber-500 text-black font-black text-xs py-2.5 rounded-xl uppercase tracking-wider hover:bg-amber-400 transition-colors mt-1">SORGULA</button>
           </div>
         </template>
 
